@@ -61,10 +61,13 @@ exports.newMessage = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 exports.getConversation = async (req, res) => {
-  const conversation = await Conversation.find();
-  res.json(conversation);
+  try {
+    const conversations = await Conversation.find().sort({ createdAt: -1 });
+    res.json(conversations);
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 exports.deleteConversation = async (req, res) => {
