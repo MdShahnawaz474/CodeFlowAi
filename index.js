@@ -1,31 +1,50 @@
 const express = require('express');
 const cors = require('cors');
-const app = express();
-require('dotenv').config();
 const mongoose = require('mongoose');
+require('dotenv').config();
+
+const app = express();
+
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
+// MongoDB connection string
 const MongoDBURL = "mongodb+srv://mdshahnawazm17:0786%401234@cluster0.ucjqz7r.mongodb.net/Gemini-conversations";
 
-// Routes
-const conversationRouter = require("./routers/conversation.js");
-app.use('/api', conversationRouter);
+// Import authentication middleware and controllers
+const { authenticateUser } = require('./middleware/auth.js');
+const authController = require('./controllers/AuthController.js');
+const conversationRouter = require('./routers/conversation.js');
+require("./CronJobs/cleanupConversations");
+const authRouter = express.Router();
 
+// Define auth routes (public)
+authRouter.post('/register', authController.register);
+authRouter.post('/login', authController.login);
 
-app.get("/test",(req,res)=>{
-// http://localhost:8080/test for testing URL
-    res.send("API is working") 
-})
+// Apply authRouter on /api/auth prefix (open routes)
+app.use('/api/auth', authRouter);
 
-// Server
+// Protect conversation routes with authentication middleware
+app.use('/api/conversations', authenticateUser, conversationRouter);
+
+// Test route
+app.get('/test', (req, res) => {
+  res.send('API is working');
+});
+
+// Connect to MongoDB then start server
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    mongoose.connect(MongoDBURL)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch(err => console.error('Could not connect to MongoDB...', err));
-  console.log(`Server is running on port ${PORT}`);
-});
+mongoose.connect(MongoDBURL)
+  .then(() => {
+    console.log('Connected to MongoDB');
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error('Could not connect to MongoDB...', err);
+  });

@@ -19,11 +19,13 @@ exports.newConversation = async (req, res) => {
         console.error("Title generation failed:", err.message);
         title = prompt.slice(0, 20) + "...";
       }
-    const conversation = new Conversation({
+   const conversation = new Conversation({
+      userId: req.user._id,
       title,
       model: model || "gemini-2.5-flash",
       messages,
-    }); 
+    });
+
     await conversation.save();
     console.log(conversation);
     
@@ -60,10 +62,19 @@ exports.newMessage = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }
-};
+ };
+// exports.getConversation = async (req, res) => {
+//   try {
+//     const conversations = await Conversation.find().sort({ createdAt: -1 });
+//     res.json(conversations);
+//   } catch (error) {
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+// Get user conversations only
 exports.getConversation = async (req, res) => {
   try {
-    const conversations = await Conversation.find().sort({ createdAt: -1 });
+    const conversations = await Conversation.find({ userId: req.user._id }).sort({ createdAt: -1 });
     res.json(conversations);
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });

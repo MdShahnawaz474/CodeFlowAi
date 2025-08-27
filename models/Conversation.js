@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
  *    - content: The message content (required).
  */
 const conversationSchema = new mongoose.Schema({
+     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     title: { type: String, required: true },
     model: { type: String, required: true },
     startTime: { type: Date, default: Date.now },
