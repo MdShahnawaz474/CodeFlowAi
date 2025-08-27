@@ -15,7 +15,7 @@ const MongoDBURL = "mongodb+srv://mdshahnawazm17:0786%401234@cluster0.ucjqz7r.mo
 
 // Import authentication middleware and controllers
 const { authenticateUser } = require('./middleware/auth.js');
-const authController = require('./controllers/AuthController.js');
+const authController = require('./controllers/authController.js');
 const conversationRouter = require('./routers/conversation.js');
 require("./CronJobs/cleanupConversations");
 const authRouter = express.Router();
